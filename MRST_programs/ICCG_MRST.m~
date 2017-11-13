@@ -15,8 +15,11 @@ opt = struct( 'Residual', false, ...
 'Convergence' , false, ...
 'Amatrix_eigs', false, ...
 'MAmatrix_eigs', false, ...
+'PMAmatrix_eigs', false, ...
 'Iter_m' , false, ...
+'E_cn' , false, ...
 'A_cn' , false, ...
+'s_opt', false, ....
 'dir', [], ...
 'Error', '10^-6', ...
 'nf', '1000', ...
@@ -24,9 +27,10 @@ opt = struct( 'Residual', false, ...
  opt = merge_options(opt, varargin{:});
  Error = opt.Error;
  nf = opt.nf;
- 
 s_opt = opt.s_opt;
+if(s_opt )
  dir = opt.dir;
+end
  W  = opt.wells;
 display(W)
 [n,m] = size(A);
@@ -36,12 +40,6 @@ if nw > 0
 else
      na = n;
 end 
-if (opt.A_cn )
-    SZ_A =size(A);
-    C_A = cond(A);
-    disp(['The size of A is: ' num2str(SZ_A)])
-    disp(['The condition number of A is: ' num2str(C_A)])
-end
 
 A(na+1 : n,:);
 b(na+1 : n);
@@ -164,7 +162,7 @@ while  (i < maxit) && (residu(i) > tol)
     end
     
 end
-if (opt.Iter_m )
+if (Iter_m )
 disp(['Number of iterations is: ' num2str(i)])
 end
 
@@ -220,7 +218,7 @@ if(opt.x_true )
     ylabel('(||x-x_k||_2)/||x||_2','FontSize', 16)
     axis tight
 end
-if(opt.Residual )
+if(Residual )
     yplotrr = residu / norm(Mb) ;      % plot the relative residual
     nf = nf+1;
     figure(nf)

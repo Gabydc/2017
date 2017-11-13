@@ -6,46 +6,31 @@
 % e-mail    : diazcortesgb@gmail.com
 % date      : 09-11-2017
 function [result,flag,res,its,resvec] = DICCG_MRST(A,b,Z,tol,maxit,M1,M2,x0,varargin)
-warning on backtrace
+%warning on backtrace
 %warning off verbose
 
 
-
-
-
 opt = struct( 'Residual', false, ...
-'x_true', false, ...
-'Convergence' , false, ...
-'Amatrix_eigs', false, ...
-'MAmatrix_eigs', false, ...
-'PMAmatrix_eigs', false, ...
-'Iterations_message' , false, ...
-'E_cn' , false, ...
-'A_cn' , false, ...
-'s_opt', false, ....
-'dir', [], ...
-'Error', '10^-6', ...
-'nf', '1000', ...
-'wells', []);
- opt = merge_options(opt, varargin{:});
-  Residual = opt.Residual;
- x_true = opt.x_true;
- Convergence = opt.Convergence;
- Error = opt.Error;
- Amatrix_eigs = opt.Amatrix_eigs;
- MAmatrix_eigs = opt.MAmatrix_eigs;
- PMAmatrix_eigs = opt. PMAmatrix_eigs;
- Iterations_message = opt.Iterations_message;
- E_cn = opt.E_cn;
- A_cn = opt.A_cn;
- W_opt  = opt.W_opt;
+    'x_true', false, ...
+    'Convergence' , false, ...
+    'Amatrix_eigs', false, ...
+    'MAmatrix_eigs', false, ...
+    'PMAmatrix_eigs', false, ...
+    'Iter_m' , false, ...
+    'E_cn' , false, ...
+    'A_cn' , false, ...
+    'dir', [], ...
+    'Error', '10^-6', ...
+    'nf', '1000', ...
+    'wells', []);
+opt = merge_options(opt, varargin{:})
  nf = opt.nf;
-s_opt = opt.s_opt;
-if(s_opt == true)
  dir = opt.dir;
-end
-    W  = opt.wells;
-display(W);
+Error = opt.Error;
+ W  = opt.wells;
+%display(W)
+nf = str2num(nf);
+
 
 nw = numel(W);
 
@@ -101,28 +86,19 @@ M2 = M22;
 b = b1;
 x0 = x01;
 clear A1 Z1 M11 M22 b1 x01
+n = n-nw ;
 end
-
-if nw > 0
-    na = n - nw
-else
-     na =n
-end  
-
-A(na : nw,:)
-b(na : nw)
-A(:,na : nw)
 
 
 Z  = sparse(Z);
 AZ = sparse(A*Z);
 E  = Z'*AZ;
 EI = inv(E);
-if (E_cn == true)
+if (opt.E_cn )
     C_E = cond(E);
     disp(['The condition number of E is: ' num2str(C_E)])
 end
-if (A_cn == true)
+if (opt.A_cn )
     SZ_A =size(A);
     C_A = cond(A);
     disp(['The size of A is: ' num2str(SZ_A)])
@@ -132,7 +108,7 @@ end
 %P = sparse(eye(n)-AZ*EI*Z');
 [u]=qvec(Z,EI,b);
 %u = Z*EI*Z'*b;
-if(x_true == true)
+if(opt.x_true )
     xtrue = A\b;
     normxtrue = norm(xtrue);
 end
@@ -149,19 +125,30 @@ r = M1 \ r;
 %p = r;
 p = M2 \ r;
 residu(i) = norm(r);
-if(x_true == true)
+tol =tol*norm(Mb);
+if(opt.x_true )
+    [xk]=tdefvec(Z,EI,A,x);
+    [Qb] = qvec(Z,EI,b);
+    xk = Qb + xk;
     fout(i)   = norm(xtrue-x)/normxtrue;
+    tresidu(i) = norm(b-A*xk);
+    if(residu(i) < tol) 
+    disp(['True residual is, r_1 = ||b-A*xk||_2: ' num2str(tresidu(i))])
+    end
 end
 
-tol =tol*norm(Mb);
+
+if(residu(i) < tol) 
+   disp(['DICCG conv in 1 iter, r_1 = ||P*M^{-1}(b-A*xk)||_2' num2str(residu(i))])
+end
+
 while  (i < maxit) && (residu(i) > tol)
-    
-    if(Convergence == true) && (residu(i) < Error)
+   
+    if(opt.Convergence) && (residu(i) < Error)
         % If the residual increases, the approximation will be the previous
         % solution
         xacc = x;
     end
-    
     i = i+1;
     w = A * p;
     %PAp = P*(A*p);
@@ -169,13 +156,13 @@ while  (i < maxit) && (residu(i) > tol)
     alpha = (r'*r)/(p'*PAp);
     x = x+alpha*p;
     y = M1 \ PAp;
-    r = r - alpha * y; 
+    r = r - alpha * y;
     beta = (r'*r)/(residu(i-1)^2);
     %z = r;
      z = M2 \ r;
     p = z+beta*p;
     residu(i) = norm(r);
-    if(x_true == true)
+    if(opt.x_true )
         % tresidu(i) = norm(u-A*(u+P'*x));
         [xk]=tdefvec(Z,EI,A,x);
         [Qb] = qvec(Z,EI,b);
@@ -184,8 +171,8 @@ while  (i < maxit) && (residu(i) > tol)
         % fout(i) = norm(xtrue-(u+P'*x))/normxtrue;
         fout(i) = norm(xtrue-xk)/normxtrue;
     end
-    
-    if(Convergence == true) && (residu(i) < Error)
+   
+    if(opt.Convergence ) && (residu(i) < Error)
         % If the residual increases, the approximation will be the previous
         % solution
         if (residu(i) >= residu(i-1))
@@ -196,9 +183,9 @@ while  (i < maxit) && (residu(i) > tol)
             break
         end
     end
-    
+   
 end
-if (Iterations_message == true)
+if (opt.Iter_m )
 disp(['Number of iterations is: ' num2str(i)])
 end
 %xk = (u+P'*x);
@@ -216,13 +203,13 @@ res = residu(i);
 its =i;
 resvec = residu;
 
-if (Wells == true)
+if (nw > 0)
     for i = 1 : nw
-        result(n-nw+i,1) = pw(n-nw+i,1);
+        result(n+i,1) = pw(n+i,1);
     end
 end
 
-if(x_true == true)
+if(opt.x_true )
     normxtrue = norm(xtrue);
     nf = nf + 1;
     figure(nf)
@@ -242,9 +229,10 @@ if(x_true == true)
     axis tight
 end
 
-[n,m] = size(A);
-nv = 1 : i;
-if(x_true == true)
+
+nv = 1 : its;
+if(opt.x_true )
+    
     yplotre = fout;                  % plot the relative error
     yplottr = tresidu / norm(Mb);      % plot the true residual
     nf = nf+1;
@@ -256,7 +244,7 @@ if(x_true == true)
     ylabel('(||x-x_k||_2)/||x||_2','FontSize', 16)
     axis tight
 end
-if(Residual == true)
+if(opt.Residual )
     yplotrr = residu / norm(Mb) ;      % plot the relative residual
     nf = nf+1;
     figure(nf)
@@ -273,7 +261,7 @@ end
 
  
 %% Eigenvalues eigenvectors
-if(Amatrix_eigs == true)
+if(opt.Amatrix_eigs )
 [V,D] = eigs(A,n);
 c = cond(A,2);
 D = sparse(D);
@@ -304,8 +292,8 @@ ylabel(' log (Value)','FontSize',16);
 title(['Eigenvalues A, \kappa (A) = ', num2str(c)],'FontSize',16);
 end
 
-if(MAmatrix_eigs == true)
-    
+if(opt.MAmatrix_eigs)
+   
     IM = inv(M1);
 [V,D] = eigs(IM*A*IM',n);
 c = cond(IM*A*IM',2);
@@ -341,9 +329,9 @@ title({'Eigenvalues M^{-1/2}AM^{-T/2} = L^{-1}AL^{-T}'; ['\kappa (L^{-1}AL^{-T})
 
 end
 
-if(PMAmatrix_eigs == true)
-    
-    
+if(opt.PMAmatrix_eigs )
+   
+   
      IM = inv(M1);
     Q = Z * EI * Z';
     P = sparse(eye(n)-AZ*EI*Z');
@@ -383,8 +371,8 @@ ylabel(' log (Value)','FontSize',16);
 title({'Eigenvalues PM^{-1/2}AM^{-T/2} = PL^{-1}AL^{-T}'; ['\kappa_{eff} (PL^{-1}AL^{-T}) = ', num2str(c)]},'FontSize',16);
 end
 
-if(PMAmatrix_eigs == true)
-    
+if(opt.PMAmatrix_eigs )
+   
      IM = inv(M1);
     Q = Z * EI * Z';
     P = sparse(eye(n)-AZ*EI*Z');
@@ -421,15 +409,6 @@ xlabel('Eigenvalue','FontSize',16);
 ylabel(' log (Value)','FontSize',16);
 title({'Eigenvalues PM^{-1/2}AM^{-T/2} = PL^{-1}AL^{-T}, all'; ['\kappa_{eff} (PL^{-1}AL^{-T}) = ', num2str(c)]},'FontSize',16);
 end
-
-
-
-
-
-
-
-
-
 
 
 
