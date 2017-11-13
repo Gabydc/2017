@@ -9,18 +9,7 @@ function [result,flag,res,its,resvec] = DICCG_MRST(A,b,Z,tol,maxit,M1,M2,x0,vara
 warning on backtrace
 %warning off verbose
 
-% Residual = false;
-% x_true = false;
-% Convergence = true;
-% Error = 10^-6;
-% Amatrix_eigs = false;
-% MAmatrix_eigs = false;
-% PMAmatrix_eigs = false;
-% Iterations_message = true;
-% E_cn = true;
-% A_cn = true;
-% Wells = false;
-% nf = 1000;
+
 
 
 
@@ -33,18 +22,32 @@ opt = struct( 'Residual', false, ...
 'Iterations_message' , false, ...
 'E_cn' , false, ...
 'A_cn' , false, ...
-'W_opt', false, ...
+'s_opt', false, ....
+'dir', [], ...
 'Error', '10^-6', ...
 'nf', '1000', ...
 'wells', []);
- opt = merge_options(opt, varargin{:})
-
- Wells  = opt.W_opt
- 
-if(Wells == true)
-    W  = opt.W;
+ opt = merge_options(opt, varargin{:});
+  Residual = opt.Residual;
+ x_true = opt.x_true;
+ Convergence = opt.Convergence;
+ Error = opt.Error;
+ Amatrix_eigs = opt.Amatrix_eigs;
+ MAmatrix_eigs = opt.MAmatrix_eigs;
+ PMAmatrix_eigs = opt. PMAmatrix_eigs;
+ Iterations_message = opt.Iterations_message;
+ E_cn = opt.E_cn;
+ A_cn = opt.A_cn;
+ W_opt  = opt.W_opt;
+ nf = opt.nf;
+s_opt = opt.s_opt;
+if(s_opt == true)
+ dir = opt.dir;
 end
+    W  = opt.wells;
 display(W);
+
+nw = numel(W);
 
 [n,m] = size(A);
 if (m ~= n)
@@ -76,8 +79,7 @@ if (nargin < 5) || isempty(maxit)
     maxit = min(n,20);
 end
 
-if (Wells == true)
-nw = size(W);
+if (nw > 0)
 for i = 1 : nw
     i;
     n-nw+i;
@@ -101,11 +103,10 @@ x0 = x01;
 clear A1 Z1 M11 M22 b1 x01
 end
 
-if exist('W','var')
-    nw = length(W);
-    na = n - nw;
+if nw > 0
+    na = n - nw
 else
-     na =n;
+     na =n
 end  
 
 A(na : nw,:)

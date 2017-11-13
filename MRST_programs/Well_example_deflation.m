@@ -110,8 +110,9 @@ L = ichol(A);
 %[L,U] = lu(A);
 x0 = zeros(n,1);
 %dcg(A,b,Z,tol,maxit,x0)
-[result,flag,res,its,resvec] = ICCG_MRST(A,b,tol,maxit,L,L',x0,'wells',W,'W_opt',true);
-[result,flag,res,its,resvec] = DICCG_MRST(A,b,Z,tol,maxit,L,L',x0);
+W = [1];
+%[result,flag,res,its,resvec] = ICCG_MRST(A,b,tol,maxit,L,L',x0,'wells',W,'x_true',true);
+[result,flag,res,its,resvec] = DICCG_MRST(A,b,Z,tol,maxit,L,L',x0,'wells',W,'x_true',true, 'w_opt', true,'Amatrix_eigs', true);
 break
 %% Report results
 % We move the plot of the grids and wells to the upper-left subplot. The

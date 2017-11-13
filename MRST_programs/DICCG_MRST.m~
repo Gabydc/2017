@@ -9,44 +9,44 @@ function [result,flag,res,its,resvec] = DICCG_MRST(A,b,Z,tol,maxit,M1,M2,x0,vara
 warning on backtrace
 %warning off verbose
 
-% Residual = false;
-% x_true = false;
-% Convergence = true;
-% Error = 10^-6;
-% Amatrix_eigs = false;
-% MAmatrix_eigs = false;
-% PMAmatrix_eigs = false;
-% Iterations_message = true;
-% E_cn = true;
-% A_cn = true;
-% Wells = false;
+
+
+
+
+opt = struct( 'Residual', false, ...
+'x_true', false, ...
+'Convergence' , false, ...
+'Amatrix_eigs', false, ...
+'MAmatrix_eigs', false, ...
+'PMAmatrix_eigs', false, ...
+'Iterations_message' , false, ...
+'E_cn' , false, ...
+'A_cn' , false, ...
+'W_opt', false, ...
+'Error', '10^-6', ...
+'nf', '1000', ...
+'wells', []);
+ opt = merge_options(opt, varargin{:})
+pt
+  Residual = opt.Residual;
+ x_true = opt.x_true;
+ Convergence = opt.Convergence;
+ Error = opt.Error;
+ Amatrix_eigs = opt.Amatrix_eigs;
+ MAmatrix_eigs = opt.MAmatrix_eigs;
+ PMAmatrix_eigs = opt. PMAmatrix_eigs;
+ Iterations_message = opt.Iterations_message;
+ E_cn = opt.E_cn;
+ A_cn = opt.A:;
+ Wells  = opt.W_o
 % nf = 1000;
- opt = struct('bc', [], 'src', [], 'wells', [], ...
-                'bcp',[],...
-                'LinSolve',     @mldivide,        ...
-                'MatrixOutput', false, ...
-                'Verbose',      mrstVerbose,...
-                'gravity',      gravity(), ...
-                'condition_number',false,...
-                'pc_form','nonwetting',...
-                'use_trans',false);
+
+if(Wells == true)
+    W  = opt.W;
+end
+display(W);
 
 
-
-
-opt = struct( 'Residual', 'false'
-'x_true', 'false', ...
-'Convergence' = true;
-'Error' = 10^-6;
-'Amatrix_eigs', 'false', ...
-'MAmatrix_eigs', 'false', ...
-'PMAmatrix_eigs', 'false', ...
-'Iterations_message' = true
-'E_cn' = true;
-'A_cn' = true;
-'Wells', 'false', ...
-'nf' = 1000;
-'W' = []);
 
 [n,m] = size(A);
 if (m ~= n)
@@ -79,12 +79,12 @@ if (nargin < 5) || isempty(maxit)
 end
 
 if (Wells == true)
-nw = size(W)
+nw = size(W);
 for i = 1 : nw
-    i
-    n-nw+i
-    bw = b(n-nw+i,1)
-    Aw = A(n-nw+i,n-nw+i)
+    i;
+    n-nw+i;
+    bw = b(n-nw+i,1);
+    Aw = A(n-nw+i,n-nw+i);
 pw(n-nw+i,1) = bw / Aw;
 end
 

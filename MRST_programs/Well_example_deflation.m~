@@ -59,11 +59,11 @@ hT    = computeTrans(G, rock);
 %% Add wells wells
 W = verticalWell([], G, rock, 1, 1, 1:nz, 'Type', 'bhp', 'Comp_i', 1,...
                 'Val', 1.0e8, 'Radius', .12*meter, 'name', 'I');
-disp('Well #1: '); display(W(1));
+%disp('Well #1: '); display(W(1));
 
 W = verticalWell(W, G, rock, nx , ny , 1:nz, 'Type', 'bhp', 'Comp_i', 1, ...
             'Val', 1.0e5, 'Radius', .12*meter, 'name', 'P');
-disp('Well #2: '); display(W(2));
+%disp('Well #2: '); display(W(2));
 
 state = initState(G, W, 0);
 
@@ -87,27 +87,31 @@ state = incompTPFA(state, G, hT, fluid, 'wells', W, 'MatrixOutput', true);
 A = state.A;
 b = state.rhs;
 [n,m] = size(A); tol = 1e-7;  maxit = 1000; 
-if( exist W)
+if exist('W','var')
     nw = length(W);
-    na
+    na = n - nw;
+    Z = zeros(na,1);
+else
+     na =n;
+     Z = zeros(n,1);
 end    
-
+size(Z)
 mz = sz/rlay;
 for i = 1: mz
    Z(n,i) = 0;
    for j = 1:n/mz
-      Z(j+(i-1)*n/mz,i) = 1;
+      Z(j+(i-1)*na/mz,i) = 1;
    end
 end
 Z = sparse(Z); 
-
 L = ichol(A);
 %   v = diag(A);
 %   L = diag(v);
 %[L,U] = lu(A);
 x0 = zeros(n,1);
 %dcg(A,b,Z,tol,maxit,x0)
-[result,flag,res,its,resvec] = ICCG_MRST(A,b,tol,maxit,L,L',x0);
+W = [1];
+%[result,flag,res,its,resvec] = ICCG_MRST(A,b,tol,maxit,L,L',x0,'wells',W,'x_true',true);
 [result,flag,res,its,resvec] = DICCG_MRST(A,b,Z,tol,maxit,L,L',x0);
 break
 %% Report results
