@@ -142,9 +142,8 @@ if(residu(i) < tol)
    disp(['DICCG conv in 1 iter, r_1 = ||P*M^{-1}(b-A*xk)||_2' num2str(residu(i))])
 end
 
-while  (i < maxit) && (residu(i) > tol)
-   
-    if(opt.Convergence) && (residu(i) < Error)
+while  (i < maxit) & (residu(i) > tol)
+    if(opt.Convergence) & (residu(i) < Error)
         % If the residual increases, the approximation will be the previous
         % solution
         xacc = x;
@@ -172,9 +171,10 @@ while  (i < maxit) && (residu(i) > tol)
         fout(i) = norm(xtrue-xk)/normxtrue;
     end
    
-    if(opt.Convergence ) && (residu(i) < Error)
+    if(opt.Convergence ) & (residu(i) < Error)
         % If the residual increases, the approximation will be the previous
         % solution
+        flag = 1;
         if (residu(i) >= residu(i-1))
             flag = 0;
         end
@@ -332,7 +332,7 @@ end
 if(opt.PMAmatrix_eigs )
    
    
-     IM = inv(M1);
+     %IM = inv(M1);
     Q = Z * EI * Z';
     P = sparse(eye(n)-AZ*EI*Z');
 [V,D] = eigs(P*IM*A*IM',n);
@@ -373,16 +373,6 @@ end
 
 if(opt.PMAmatrix_eigs )
    
-     IM = inv(M1);
-    Q = Z * EI * Z';
-    P = sparse(eye(n)-AZ*EI*Z');
-[V,D] = eigs(P*IM*A*IM',n);
-D = diag(D);
-D = real(D);
-D= abs(D);
-lmax = max(D);
-lmin = min(D);
-c = lmax/lmin;
 nf = nf+1;
 figure(nf)
 % Create axes

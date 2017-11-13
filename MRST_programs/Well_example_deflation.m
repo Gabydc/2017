@@ -11,18 +11,18 @@ mrstModule add incomp
 %% Set up reservoir model
 
 nf =100;
-sz = 20;
-szz = 10;
+sz = 200;
+szz = 1;
 [nxi,nyi,nzi] = deal(1, 1, 1);
 [nx,ny,nz] = deal(sz, sz, szz);
-[Lx,Ly,Lz] = deal( 500, 500, 25);
+[Lx,Ly,Lz] = deal( 500, 500, 250);
 rperm = 100;
 G = cartGrid([nx,ny,nz],[Lx,Ly,Lz]);
 G = computeGeometry(G);
 rock = makeRock(G, rperm*milli*darcy, .2);
 pl = true;
 % Contrast in permeability layers
-per = 1;
+per = 2;
 % Number of layers with same permeability
 rlay = 2;
 % Create layers of  diverse permeability
@@ -75,9 +75,9 @@ state1 = incompTPFA(state, G, hT, fluid, 'wells', W, 'MatrixOutput', true);
 
 
 p0 = state.pressure;
-solver = ICCGSolverAD('tolerance', 5.0e-11,'maxIterations', 2000,'cn',0,'x0',p0,'W', W);
-%    solver = DPCG_ICSolverAD_cn('tolerance', 5.0e-11,'maxIterations', 2000, 'Z',Z,'cn',0,'x0',p0);
-linsolve_p = @(A, b) solver.solveLinearSystem(A, b);
+% solver = ICCGSolverAD('tolerance', 5.0e-11,'maxIterations', 2000,'cn',0,'x0',p0,'W', W);
+% %    solver = DPCG_ICSolverAD_cn('tolerance', 5.0e-11,'maxIterations', 2000, 'Z',Z,'cn',0,'x0',p0);
+% linsolve_p = @(A, b) solver.solveLinearSystem(A, b);
 % psolve = @(x,p0,W) ...
 %     incompTPFA_Def(x, G, T, fluid, 'wells', W,'LinSolve', linsolve_p);
 
@@ -106,8 +106,8 @@ end
 size(Z)
 Z = sparse(Z); 
 L = ichol(A);
-
-solver = DICCGSolverAD('tolerance', 5.0e-11,'maxIterations', 2000,'Z',Z,'cn',0,'x0',p0,'W', W);
+solver = ICCGSolverAD('tolerance', 5.0e-11,'maxIterations', 2000,'cn',0,'x0',p0,'W', W);
+%solver = DICCGSolverAD('tolerance', 5.0e-11,'maxIterations', 2000,'Z',Z,'cn',0,'x0',p0,'W', W);
 %    solver = DPCG_ICSolverAD_cn('tolerance', 5.0e-11,'maxIterations', 2000, 'Z',Z,'cn',0,'x0',p0);
 linsolve_p = @(A, b) solver.solveLinearSystem(A, b);
 % psolve = @(x,p0,W) ...
@@ -159,17 +159,17 @@ subplot(2,2,3)
    title('Pressure [bar]')
    view(3), camproj perspective, axis tight off
 
-subplot(2,2,4)
-   [i j k] = ind2sub(G.cartDims, 1:G.cells.num);
-   I = false(nx,1); I([1 end])=true;
-   J = false(ny,1); J(end)=true;
-   K = false(nz,1); K([1 end]) = true;
-   cf = accumarray(getCellNoFaces(G), ...
-      abs(faceFlux2cellFlux(G, state.flux)));
-   plotCellData(G, convertTo(cf, meter^3/day), I(i) | J(j) | K(k),'EdgeAlpha',.1);
-   title('Flux intensity [m^3/day]')
-   view(-40,20), camproj perspective, axis tight, box on
-   set(gca,'XTick',[],'YTick',[],'ZTick',[]);
+% subplot(2,2,4)
+%    [i j k] = ind2sub(G.cartDims, 1:G.cells.num);
+%    I = false(nx,1); I([1 end])=true;
+%    J = false(ny,1); J(end)=true;
+%    K = false(nz,1); K([1 end]) = true;
+%    cf = accumarray(getCellNoFaces(G), ...
+%       abs(faceFlux2cellFlux(G, state.flux)));
+%    plotCellData(G, convertTo(cf, meter^3/day), I(i) | J(j) | K(k),'EdgeAlpha',.1);
+%    title('Flux intensity [m^3/day]')
+%    view(-40,20), camproj perspective, axis tight, box on
+%    set(gca,'XTick',[],'YTick',[],'ZTick',[]);
 
 %{
 Copyright 2009-2017 SINTEF ICT, Applied Mathematics.

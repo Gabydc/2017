@@ -74,7 +74,6 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
             solver.x0 = [];
             solver.W= [];
             solver.cn = 0;
-            
             solver = merge_options(solver, varargin{:});
         end
         
@@ -83,11 +82,10 @@ along with MRST.  If not, see <http://www.gnu.org/licenses/>.
             nel = size(A, 1);
             
             [L] = ichol(A, solver.getOptsIC());
-            solver.W
             
             [result,flag,relres,iter,resvec] = ICCG_MRST(A,b,...
                 solver.tolerance,min(solver.maxIterations,nel),L,L',solver.x0,...
-            'wells',solver.W,'Iter_m', true);
+            'wells',solver.W,'Iter_m', true,'nf','3000');
             %   A(nel+1:end,:)
             %  b(nel+1:end,:)
             % x = A\b;

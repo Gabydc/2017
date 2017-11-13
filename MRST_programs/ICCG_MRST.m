@@ -24,8 +24,7 @@ opt = struct( 'Residual', false, ...
  opt = merge_options(opt, varargin{:});
  Error = opt.Error;
  nf = opt.nf;
- 
-s_opt = opt.s_opt;
+
  dir = opt.dir;
  W  = opt.wells;
 display(W)
