@@ -122,12 +122,7 @@ state = incompTPFA_Def(state, G, hT, fluid, 'wells', W,'LinSolve', linsolve_p);
 %[L,U] = lu(A);
 x0 = zeros(n,1);
 %dcg(A,b,Z,tol,maxit,x0)
-<<<<<<< HEAD
-W = [1];
-%[result,flag,res,its,resvec] = ICCG_MRST(A,b,tol,maxit,L,L',x0,'wells',W,'x_true',true);
-[result,flag,res,its,resvec] = DICCG_MRST(A,b,Z,tol,maxit,L,L',x0,'wells',W,'x_true',true, 'w_opt', true,'Amatrix_eigs', true);
-break
-=======
+
 %[result,flag,res,its,resvec] = DICCG_MRST(A,b,Z,tol,maxit,L,L',x0,'wells',W);
 
 %[result,flag,res,its,resvec] = ICCG_MRST(A,b,tol,maxit,L,L',x0,'wells',W);
@@ -144,7 +139,7 @@ plotGrid(G, 'FaceColor', 'none');
 view(3), camproj perspective, axis tight off,
 plotWell(G, W(1), 'radius',  1, 'height', 5, 'color', 'r');
 plotWell(G, W(2), 'radius', .5, 'height', 5, 'color', 'b');
->>>>>>> 1915cd1296fc23763d76aa94a9687bd8d0857a31
+
 %% Report results
 % We move the plot of the grids and wells to the upper-left subplot. The
 % producer inflow profile is shown in the upper-right and the cell
