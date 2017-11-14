@@ -106,8 +106,8 @@ end
 size(Z)
 Z = sparse(Z); 
 L = ichol(A);
-solver = ICCGSolverAD('tolerance', 5.0e-11,'maxIterations', 2000,'cn',0,'x0',p0,'W', W);
-%solver = DICCGSolverAD('tolerance', 5.0e-11,'maxIterations', 2000,'Z',Z,'cn',0,'x0',p0,'W', W);
+%solver = ICCGSolverAD('tolerance', 5.0e-11,'maxIterations', 2000,'cn',0,'x0',p0,'W', W);
+solver = DICCGSolverAD('tolerance', 5.0e-11,'maxIterations', 2000,'Z',Z,'cn',0,'x0',p0,'W', W);
 %    solver = DPCG_ICSolverAD_cn('tolerance', 5.0e-11,'maxIterations', 2000, 'Z',Z,'cn',0,'x0',p0);
 linsolve_p = @(A, b) solver.solveLinearSystem(A, b);
 % psolve = @(x,p0,W) ...
