@@ -118,20 +118,99 @@ src = addSource(src, G.cells.num, -sum(poreVolume(G, rock)), 'sat', 1);
 trans  = computeTrans(G, rock);
 xr = incompTPFA(initResSol(G, 100), G, trans, fluid, 'src', src);
 xb = incompTPFA(initResSol(G, 100), G, trans, fluid, 'bc', bc);
-dir ='/mnt/sda2/cortes/Programs/2017/MRST_programs/Injection_B/Results/';
+
 TOF_F(xr, G, rock,'reverse', true, ...
     'times' , true, ...
     'plots', true, ...
     'nf', '1', ...
-    'src', src, 'dir', dir);
+    'src', src, 'dir', '\Results);
 
 TOF_F(xb, G, rock,'reverse', true, ...
     'times' , true, ...
     'plots', true, ...
     'nf', '10', ...
-    'bc', bc, 'dir', dir);
+    'bc', bc);
+
+break
+
+figure
+clf,
+plotCellData(G,xr.pressure, 'edgecolor','k','edgealpha',.05);
+title('pressure')
+axis equal tight;colormap jet
+colorbar
+figure
+clf,
+plotCellData(G,xb.pressure, 'edgecolor','k','edgealpha',.05);
+title('pressure')
+axis equal tight;colormap jet
+colorbar
 
 
+%% Compute time-of-flight
+% Once the fluxes are given, the time-of-flight equation is discretized
+% with a standard upwind finite-volume method
+t0 = tic;
+T  = computeTimeOfFlight(xr, G, rock, 'src',src);
+RT  = computeTimeOfFlight(xr, G, rock, 'src',src,'reverse',true);
+toc(t0)
+figure
+clf,
+cmin = min(T);
+cmax = max(T);
+plotCellData(G, T, 'edgecolor','k','edgealpha',0.05);
+title('time-of-flight');
+caxis([cmin,cmax]);axis equal tight;colormap jet
+colorbar
+figure
+clf,
+cmin = min(RT);
+cmax = max(RT);
+plotCellData(G, RT, 'edgecolor','k','edgealpha',0.05);
+title('reverse-time-of-flight');
+caxis([cmin,cmax]);axis equal tight;colormap jet
+colorbar
+figure
+clf,
+cmin = min(T+RT)
+cmax = max(T+RT)
+plotCellData(G, T+RT, 'edgecolor','k','edgealpha',0.05);
+title('total-travel-time');
+caxis([cmin,cmax]);axis equal tight;colormap jet
+colorbar
+
+
+
+t0 = tic;
+Tb  = computeTimeOfFlight(xb, G, rock, 'bc',bc);
+RTb  = computeTimeOfFlight(xb, G, rock, 'bc',bc,'reverse',true);
+toc(t0)
+figure
+clf,
+cmin = min(Tb);
+cmax = max(Tb);
+plotCellData(G, Tb, 'edgecolor','k','edgealpha',0.05);
+title('time-of-flight-bc');
+caxis([cmin,cmax]);axis equal tight;colormap jet
+colorbar
+
+figure
+clf,
+cmin = min(RTb);
+cmax = max(RTb);
+plotCellData(G, RTb, 'edgecolor','k','edgealpha',0.05);
+title('reverse-time-of-flight-bc');
+caxis([cmin,cmax]);axis equal tight;colormap jet
+colorbar
+
+figure
+clf,
+cmin = min(RTb+Tb)
+cmax = max(RTb+Tb)
+plotCellData(G, RTb+Tb, 'edgecolor','k','edgealpha',0.05);
+title('total-travel-time-bc');
+caxis([cmin,cmax]);axis equal tight;colormap jet
+colorbar
 
 
 %% Copyright notice

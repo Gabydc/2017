@@ -106,25 +106,7 @@ for cp = [0 ]
                     % drive the global flow:
                    % hT = simpleComputeTrans(G, rock);
                                         hT  = computeTrans(G, rock);
-xr = incompTPFA(initResSol(G, 0), G, hT, fluid, 'src', src);
-clf,
-plotCellData(G,xr.pressure, 'edgecolor','k','edgealpha',.05);
-title('pressure')
-axis equal tight;colormap jet
-colorbar
 
-%% Compute time-of-flight
-% Once the fluxes are given, the time-of-flight equation is discretized
-% with a standard upwind finite-volume method
-t0 = tic;
-T  = computeTimeOfFlight(xr, G, rock, 'src',src);
-toc(t0)
-
-clf,
-plotCellData(G, T, 'edgecolor','k','edgealpha',0.05);
-title('time-of-flight');
-caxis([0,0.8]);axis equal tight;colormap jet
-colorbar
 
                     %% Fluid model
                     % We set up a two-phase fluid. Viscosity, density is
@@ -165,7 +147,27 @@ colorbar
                     injRate = -0.4*meter^3/day;
                     bc = fluxside([], G, 'xmin', -injRate, 'sat', [1, 0]);
                     bc = pside(bc, G, 'xmax', 0*barsa, 'sat', [0, 1]);
-                    
+                   %% Compute Time of flight
+                    xr = incompTPFA(initResSol(G, 100), G, hT, fluid, 'bc', bc);
+clf,
+plotCellData(G,xr.pressure, 'edgecolor','k','edgealpha',.05);
+title('pressure')
+axis equal tight;colormap jet
+colorbar
+
+%% Compute time-of-flight
+% Once the fluxes are given, the time-of-flight equation is discretized
+% with a standard upwind finite-volume method
+t0 = tic;
+T  = computeTimeOfFlight(xr, G, rock, 'bc',bc);
+toc(t0)
+
+clf,
+plotCellData(G, T, 'edgecolor','k','edgealpha',0.05);
+title('time-of-flight');
+caxis([0,0.8]);axis equal tight;colormap jet
+colorbar
+break
                     %% Set pressure solver
                     % Initiate the pressure of the reservoir
                     rSol = initState(G, [], 100*barsa, [0 1]);

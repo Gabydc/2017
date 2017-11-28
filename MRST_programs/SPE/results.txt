@@ -1,0 +1,7 @@
+\begin{table}[!ht]\centering
+\begin{minipage}{0.5\textwidth}
+ \centering
+\begin{tabular}{ ||c|c|c|c||} 
+\hline
+Total&Method &Iterations &\% of ICCG\\ 
+ICCG& & &Iterations\\ 

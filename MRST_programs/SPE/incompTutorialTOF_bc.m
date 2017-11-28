@@ -22,17 +22,14 @@ mrstModule add incomp diagnostics streamlines
 % simplicity, we assume unit permeability and porosity and use a set of
 % source and sink terms to emulate a quater five-point setup.
 [nx,ny,nz] = deal(35,35,1);
-per =0;
-cp =0;
+per = 0;
+cp = 0;
 %Create the grid
 % G = twister(G);
 % G = computeGeometry(G);
 G = cartGrid([nx, ny, nz], [nx, ny, nz]);
 G = computeGeometry(G);
 
-%streamlines parameters
-seed = (nx*ny/2 + (1:nx)).';
-%seed = (nx*ny/2 + (1:nx)).';
 
 
 %% Forward time-of-flight
@@ -105,96 +102,36 @@ else
     file{nf} = ['Capillary pressure'];
 end
 pv = poreVolume(G, rock);
-%injRate = -sum(pv)/(500*day);
+%injRate = -sum(pv)/(50*day);
 injRate = -0.4*meter^3/day;
 bc = fluxside([], G, 'xmin', -injRate, 'sat', [1, 0]);
 bc = pside(bc, G, 'xmax', 0*barsa, 'sat', [0, 1]);
 src = addSource([], 1, sum(poreVolume(G,rock)), 'sat', 1);
 src = addSource(src, G.cells.num, -sum(poreVolume(G, rock)), 'sat', 1);
 
+
+
+
+
 %% Solve pressure equation
 % Compute transmissibilities and solve pressure equation
 trans  = computeTrans(G, rock);
 xr = incompTPFA(initResSol(G, 100), G, trans, fluid, 'src', src);
 xb = incompTPFA(initResSol(G, 100), G, trans, fluid, 'bc', bc);
-figure
-clf,
-plotCellData(G,xr.pressure, 'edgecolor','k','edgealpha',.05);
-title('pressure')
-axis equal tight;colormap jet
-colorbar
-figure
-clf,
-plotCellData(G,xb.pressure, 'edgecolor','k','edgealpha',.05);
-title('pressure')
-axis equal tight;colormap jet
-colorbar
+dir ='/mnt/sda2/cortes/Programs/2017/MRST_programs/Injection_B/Results/';
+TOF_F(xr, G, rock,'reverse', true, ...
+    'times' , true, ...
+    'plots', true, ...
+    'nf', '1', ...
+    'src', src, 'dir', dir);
+
+TOF_F(xb, G, rock,'reverse', true, ...
+    'times' , true, ...
+    'plots', true, ...
+    'nf', '10', ...
+    'bc', bc, 'dir', dir);
 
 
-%% Compute time-of-flight
-% Once the fluxes are given, the time-of-flight equation is discretized
-% with a standard upwind finite-volume method
-t0 = tic;
-T  = computeTimeOfFlight(xr, G, rock, 'src',src);
-RT  = computeTimeOfFlight(xr, G, rock, 'src',src,'reverse',true);
-toc(t0)
-figure
-clf,
-cmin = min(T);
-cmax = max(T);
-plotCellData(G, T, 'edgecolor','k','edgealpha',0.05);
-title('time-of-flight');
-caxis([cmin,cmax]);axis equal tight;colormap jet
-colorbar
-figure
-clf,
-cmin = min(RT);
-cmax = max(RT);
-plotCellData(G, RT, 'edgecolor','k','edgealpha',0.05);
-title('reverse-time-of-flight');
-caxis([cmin,cmax]);axis equal tight;colormap jet
-colorbar
-figure
-clf,
-cmin = min(T+RT)
-cmax = max(T+RT)
-plotCellData(G, T+RT, 'edgecolor','k','edgealpha',0.05);
-title('total-travel-time-of-flight');
-caxis([cmin,cmax]);axis equal tight;colormap jet
-colorbar
-
-
-
-t0 = tic;
-Tb  = computeTimeOfFlight(xb, G, rock, 'bc',bc);
-RTb  = computeTimeOfFlight(xb, G, rock, 'bc',bc,'reverse',true);
-toc(t0)
-figure
-clf,
-cmin = min(Tb);
-cmax = max(Tb);
-plotCellData(G, Tb, 'edgecolor','k','edgealpha',0.05);
-title('time-of-flight_bc');
-caxis([cmin,cmax]);axis equal tight;colormap jet
-colorbar
-
-figure
-clf,
-cmin = min(RTb);
-cmax = max(RTb);
-plotCellData(G, RTb, 'edgecolor','k','edgealpha',0.05);
-title('reverse-time-of-flight_bc');
-caxis([cmin,cmax]);axis equal tight;colormap jet
-colorbar
-
-figure
-clf,
-cmin = min(RTb);
-cmax = max(RTb);
-plotCellData(G, RTb, 'edgecolor','k','edgealpha',0.05);
-title('reverse-time-of-flight_bc');
-caxis([cmin,cmax]);axis equal tight;colormap jet
-colorbar
 
 
 %% Copyright notice
