@@ -6,11 +6,13 @@ clear, close all hidden
 
 %%
 dir='/mnt/sda2/cortes/Results/2017/Report/SPE10/training/11_26/ex1/';
-use_ICCG = true;
-use_DICCG = false;
+use_ICCG   = true;
+use_DICCG  = false;
+plot_sol   = false; 
 
-
-
+% Pressure in injector and producers
+P = 275;
+I = 770;
 
 
 spe10_data  = fullfile(fileparts(mfilename('fullpath')), ...
@@ -47,37 +49,37 @@ fluid = initSimpleFluid('mu' , [   1,  10]*centi*poise     , ...
 
 %%
 % Set Comp_i=[0,0] in producers to counter X-flow effects...
-%
+
 well_ip = 'ip_tpf';
 W = verticalWell([], G, rock,  1,   1, [], 'Type', 'bhp', ...
                  'InnerProduct', well_ip, ...
-                 'Val', 275*barsa, 'Radius', 0.125*meter, ...
+                 'Val', P*barsa, 'Radius', 0.125*meter, ...
                  'Name', 'P1', 'Comp_i', [0, 0]);
 
 W = verticalWell(W , G, rock, 60,   1, [], 'Type', 'bhp', ...
                  'InnerProduct', well_ip, ...
-                 'Val', 275*barsa, 'Radius', 0.125*meter, ...
+                 'Val', P*barsa, 'Radius', 0.125*meter, ...
                  'Name', 'P2', 'Comp_i', [0, 0]);
 
 W = verticalWell(W , G, rock, 60, 220, [], 'Type', 'bhp', ...
                  'InnerProduct', well_ip, ...
-                 'Val', 275*barsa, 'Radius', 0.125*meter, ...
+                 'Val', P*barsa, 'Radius', 0.125*meter, ...
                  'Name', 'P3', 'Comp_i', [0, 0]);
 
 W = verticalWell(W , G, rock,  1, 220, [], 'Type', 'bhp', ...
                  'InnerProduct', well_ip, ...
-                 'Val', 275*barsa, 'Radius', 0.125*meter, ...
+                 'Val', P*barsa, 'Radius', 0.125*meter, ...
                  'Name', 'P4', 'Comp_i', [0, 0]);
 
 W = verticalWell(W , G, rock, 30, 110, [], 'Type', 'bhp',   ...
                  'InnerProduct', well_ip, ...
-                 'Val', 7.6590e7, 'Radius', 0.125*meter, ...
+                 'Val', I*barsa, 'Radius', 0.125*meter, ...
                  'Name', 'I1', 'Comp_i', [1, 0]);
 
 
 
 %%
-x         = initResSol (G, 20000*psia);
+x         = initResSol (G, 0*barsa);
 x.wellSol = initWellSol(W, 0);
 
 %%
@@ -95,9 +97,7 @@ DT    = 100*day;
 nstep =  40;
 %% Change wells
 
-% Pressure in injector and producers
-P = 275;
-I = 700;
+
 
 folder=[ 'SPE10_' num2str(numel(layers))  'DT_' num2str(DT/day) 'step_' num2str(nstep) 'P_1'];
 mkdir([dir], folder)
@@ -123,9 +123,8 @@ dir2 = [dir1 folder '/'];
 % Number of time steps with same pressure
 tch =2;
 Changing_w
-%for i=1:6; wi(i)=W1{i}(1).val; end
-%figure; plot(wi/barsa)
-%break
+
+
 Prod = struct('t'  , []                  , ...
     'vpt', zeros([0, numel(W)]), ...
     'opr', zeros([0, numel(W)]), ...
@@ -157,6 +156,7 @@ if(use_DICCG)
     dpod = [np-dv+1:np];
     [U,S]=PODbasis(Pressure);
     Z=U(:,dpod);
+    if plot_sol 
     nf = nf+1;
     file{nf} = ['eig_pod'];
     f(nf) = figure(nf);
@@ -172,7 +172,7 @@ if(use_DICCG)
     ylabel('vectors ','FontSize',16)
     xlabel('eigenvectors','FontSize',16)
     axis('tight')
-    
+    end
     for i=1:numel(W)
         Z(n+i,1)=0;
     end
@@ -189,7 +189,7 @@ load I_p
 dI_p = (I_p(20) - I_p(1))/nstep;
 for k = 1 : nstep,
     
-    PI_1 = (I_p(1)+dI_p*k)*0.5;
+    PI_1 = I_p(1)+dI_p*k;
     W(5).val = PI_1;
     
     % Set initial condition
@@ -231,9 +231,9 @@ for k = 1 : nstep,
     fprintf('[%02d]: Pressure:  %12.5f [s]\n', k, dt);
     
     t0 = tic;
-    % for i= 1:10
-    x = tsolve(x, DT);
-    % end
+     for i= 1:3
+    x = tsolve(x, DT/3);
+     end
     dt = toc(t0);
     fprintf('[%02d]: Transport: %12.5f [s]\n', k, dt);
     
@@ -269,6 +269,12 @@ save(filename)
 
 
 %%
+if plot_sol
+    
+for i=1:6; wi(i)=W1{i}(1).val/barsa; end
+figure; plot(wi/barsa,'*-','color', [0.1*i 0.5 0.6])
+
+    
 nf = nf + 1;
 figure(nf);
 file{nf} = ['Pressure'];
@@ -366,21 +372,13 @@ axis equal off
 colorbar('south')
 % subplotcbspe(nf1,clim,k,Np,G,nz,time,Press)
 
-
-
-
-%%
-
-
-%%
-
 for i = nf1 : nf
     f(i) = figure(i);
     savefigures(f(i), file{i}, dir2)
 end
 clear f
 %%
-
+end
 
 % files=['Pressure'];
 % filename=[dir1 files ];
