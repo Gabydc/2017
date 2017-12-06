@@ -100,7 +100,7 @@ end
 if ~use_reorder,
    tsolve = @(x, dt) ...
       implicitTransport(x, G, dt, rock, fluid, 'wells', W, ...
-                        'LinSolve', linsolve_t);
+                        'LinSolve', linsolve_t, 'verbose',true);
 else
    mu          = fluid.properties();
    fluid.param = struct('viscw', mu(1), 'visco', mu(2),       ...
@@ -133,10 +133,10 @@ wres = cell([1, 4]);
 for k = 1 : nstep,
    t0 = tic; x = psolve(x);     dt = toc(t0);
    fprintf('[%02d]: Pressure:  %12.5f [s]\n', k, dt);
-
+   for i = 1 :10
    t0 = tic; x = tsolve(x, DT); dt = toc(t0);
    fprintf('[%02d]: Transport: %12.5f [s]\n', k, dt);
-
+   
    t = k * DT;
 
    [wres{:}] = prodCurves(W, x, fluid);

@@ -23,13 +23,17 @@ figure(nf);
 file{nf} = ['Pressure_w'];   
 for i=1:5
     for j = 1 : nstep
+        if training
     wi(j,i)=W1{j}(i).val/barsa;
+        else
+            wi(j,i)=W0{j}(i).val/barsa;
+        end
     end
     plot(wi(:,i),'color', pcol{i})
     hold on
 end
 xlabel('Time [d]'), ylabel('Pressure [bars]')
-legend({ W(1:end-1).name})
+legend({ W(1:end).name})
 %%
 nf = nf + 1;
 figure(nf);

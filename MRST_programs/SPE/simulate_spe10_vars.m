@@ -134,17 +134,25 @@ end
 
 %% Save results
 if save_res
-    filetx = ['results.txt'];
-    saveits(dir1,filetx,use_ICCG,use_DICCG,use_POD,dpod,k,dv,preport,last)
+    if(~training)
+        for i=1:ts
+            its(i,1)=preport(1,i).iter;
+        end
+        ttits = sum(its);
+        save([dir1  'ttits_T.mat'],'ttits_T')
+    else
+        filetx = ['resultst.txt'];
+        saveits(dir1,filetx,use_ICCG,use_DICCG,use_POD,dpod,k,dv,preport,last)
+    end
     filews=['workspace'];
     filename=[dir2 filews];
     save(filename)
-  %  clearvars -except Pressure dir1 plot_sol
-  if use_ICCG
-    filews=['Pressure'];
-    filename=[dir1 filews];
-    save(filename,'Pressure')
-  end
+    %  clearvars -except Pressure dir1 plot_sol
+    if training
+        filews=['Pressure'];
+        filename=[dir1 filews];
+        save(filename,'Pressure')
+    end
 end
 %%
 if plot_sol

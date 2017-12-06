@@ -29,11 +29,11 @@ Value(5,:) = I;
 for w = 1:numel(newW),
     for i = 1:2
         newW{w}(i).type = 'bhp';
-        newW{w}(i).val= (P/2*Value(i,w)+P/2)*units_w;
+        newW{w}(i).val= (P/2*Value(i,w)+P/2)*units_P;
     end
     for i = 3:4
         newW{w}(i).type = 'bhp';
-        newW{w}(i).val= (P/2*Value(i,w)+P/2)*units_w;
+        newW{w}(i).val= (P/2*Value(i,w)+P/2)*units_P;
     end
 end
 

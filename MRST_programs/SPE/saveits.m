@@ -19,10 +19,11 @@ if ~exist(text, 'file')
 end
 
 if (use_ICCG)
-    
+    fileID = fopen(text,'a');
     ttits = sum(its);
     save([dir1  'ttits.mat'],'ttits')
-    
+   fprintf(fileID,[ num2str(ttits) '& ICCG&' num2str(ttits)  '&' num2str(1) '\\\\ \n']);
+
 else if (use_DICCG)
         
         tits = sum(its);

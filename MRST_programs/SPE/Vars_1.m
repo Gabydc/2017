@@ -11,19 +11,21 @@ end
 %% Initial values
 units_w = barsa;
 %Pressure of the wells
-P = 275;
-I = 600;
- 
+P = 270;
+I = 5000;
+%I = 50;
+units_I = stb/day;
+%units_I = barsa;
 %Pressure of the reservoir
-p_0 = 400;
+p_0 = 500;
 
 %% Time
 % Time steps
-DT    = 50*day;
-nstep =  40;
+DT    = 100*day;
+nstep =  20;
 
 %% Model
-layers = 1 : 35;
+layers = 1 : 85;
 [nx, ny, nz] = deal(60, 220, numel(layers));
 cartDims = [nx, ny,nz];
 physDims = cartDims .* [20, 10, 2]*ft;
@@ -43,33 +45,6 @@ fluid = initSimpleFluid('mu' , [   1,  10]*centi*poise     , ...
     'n'  , [   2,   2]);
 
 
-%% Define Solver
-use_ICCG   = false;
-use_DICCG  = true;
-use_POD    = true;
-plot_sol   = true; 
-save_res   = true;
-
-% Solvers variables
-tol = 5.0e-8;
-maxIter = 1500;
-
-% Deflation parameters
-dv = 15;
-dpod = [nstep-dv+1:nstep];
-last       = false;
-%% Create directories to save results
-dir='/mnt/sda2/cortes/Results/2017/Report/SPE10/training/12_01/ex1/';
-folder=[ 'SPE10_' num2str(numel(layers))  'DT_' num2str(DT/day) 'step_' num2str(nstep) 'P_1'];
-mkdir([dir], folder)
-dir1 = [dir folder '/'];
-if use_ICCG
-    folder=['ICCG' ];
-else
-    folder=['DICCG' ];
-end
-mkdir([dir1], folder)
-dir2 = [dir1 folder '/'];
 
 %% Compute wells 
 % Set Comp_i=[0,0] in producers to counter X-flow effects...
@@ -95,12 +70,41 @@ W = verticalWell(W , G, rock,  1, ny, [], 'Type', 'bhp', ...
                  'Val', P*barsa, 'Radius', 0.125*meter, ...
                  'Name', 'P4', 'Comp_i', [0, 0]);
 
-W = verticalWell(W , G, rock, ceil(nx/2), ceil(ny/2), [], 'Type', 'bhp',   ...
+W = verticalWell(W , G, rock, ceil(nx/2), ceil(ny/2), [], 'Type', 'rate',   ...
                  'InnerProduct', well_ip, ...
-                 'Val', I*barsa, 'Radius', 0.125*meter, ...
+                 'Val', I*units_I, 'Radius', 0.125*meter, ...
                  'Name', 'I1', 'Comp_i', [1, 0]);
 %% Changing wells parameters
 
 % Number of time steps with same pressure
 tch =2;
 Changing_w
+%% Define Solver
+use_ICCG   = true;
+use_DICCG  = false;
+use_POD    = true;
+plot_sol   = false; 
+save_res   = true;
+training   = true;
+% Solvers variables
+tol = 5.0e-8;
+maxIter = 2000;
+
+% Deflation parameters
+dv = 20;
+dpod = [nstep-dv+1:nstep];
+last       = false;
+
+%% Create directories to save results
+dir='/mnt/sda2/cortes/Results/2017/Report/SPE10/training/12_03/ex1/';
+folder=[ 'SPE10_' num2str(numel(layers))  'DT_' num2str(DT/day) 'step_' num2str(nstep) 'P_1'];
+mkdir([dir], folder)
+dir1 = [dir folder '/'];
+if use_ICCG
+    folder=['ICCG' ];
+else
+    folder=['DICCG' ];
+end
+mkdir([dir1], folder)
+dir2 = [dir1 folder '/'];
+
